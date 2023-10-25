@@ -8,11 +8,29 @@
 class MathExpression {
   final String _expression;
 
-  MathExpression(String exp): _expression = exp.replaceAll(' ', '');
+  MathExpression(String exp) : _expression = exp.replaceAll(' ', '');
 
   double eval(Map<String, dynamic> params) {
-    print(_getOperands(_expression));
-    return _expression.isEmpty ? 0 : 1;
+    ({String left, String operator, String right}) exp =
+        _getOperands(_expression);
+    return _calcExpression(exp.left, exp.operator, exp.right);
+  }
+
+  double _calcExpression(
+    String leftOperand,
+    String operator,
+    String rightOperand,
+  ) {
+    double left = double.parse(leftOperand);
+    double right = double.parse(rightOperand);
+    return switch (operator)
+    {
+      '+' => left + right,
+      '-' => left - right,
+      '*' => left * right,
+      '/' => left / right,
+      _ => throw Exception(),
+    };
   }
 
   bool _isOperator(String symbol) {
@@ -23,7 +41,7 @@ class MathExpression {
     return ['+', '-'].contains(symbol);
   }
 
-  Record _getOperands(String exp) {
+  ({String left, String operator, String right}) _getOperands(String exp) {
     String leftOperand = '';
     String operator = '';
     String rightOperand = '';
@@ -39,7 +57,7 @@ class MathExpression {
             break;
           }
         }
-      } else if(exp[i] == '(') {
+      } else if (exp[i] == '(') {
         openedParenthesesCount++;
       } else if (exp[i] == ')') {
         openedParenthesesCount--;
@@ -49,10 +67,16 @@ class MathExpression {
   }
 }
 
+class PrimitiveExpression {
+  double calc() {
+    return 0;
+  }
+}
+
 void main() {
-  MathExpression mathExpression = MathExpression('2-8/1*9+1'); // '10*5+4/2-1'
   Map<String, dynamic> params = {
     'x': 10,
   };
-  mathExpression.eval(params);
+  MathExpression mathExpression = MathExpression('2+8');
+  print(mathExpression.eval(params));
 }
