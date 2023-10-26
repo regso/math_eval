@@ -1,34 +1,30 @@
-/*
- Требования:
- - поддержка операций: +, -, *, /
- - вложенные скобки
- - знак минус
-*/
-
 class MathExpression {
   final String _expression;
 
   MathExpression(String exp) : _expression = exp.replaceAll(' ', '');
 
   double eval(Map<String, dynamic> params) {
-    ({String left, String operator, String right}) exp =
-        _getOperands(_expression);
-    return _calcExpression(exp.left, exp.operator, exp.right);
+    return _calc(_expression);
   }
 
-  double _calcExpression(
-    String leftOperand,
-    String operator,
-    String rightOperand,
-  ) {
-    double left = double.parse(leftOperand);
-    double right = double.parse(rightOperand);
-    return switch (operator)
-    {
-      '+' => left + right,
-      '-' => left - right,
-      '*' => left * right,
-      '/' => left / right,
+  double _calc(String exp) {
+    if (exp.length > 2 && exp.startsWith('(') && exp.endsWith(')')) {
+      exp = exp.substring(1, exp.length - 1);
+    }
+
+    if (double.tryParse(exp) != null) {
+      return double.parse(exp);
+    }
+
+    ({String left, String operator, String right}) splitExp = _getOperands(exp);
+    double leftOperand = _calc(splitExp.left);
+    double rightOperand = _calc(splitExp.right);
+
+    return switch (splitExp.operator) {
+      '+' => leftOperand + rightOperand,
+      '-' => leftOperand - rightOperand,
+      '*' => leftOperand * rightOperand,
+      '/' => leftOperand / rightOperand,
       _ => throw Exception(),
     };
   }
@@ -67,16 +63,16 @@ class MathExpression {
   }
 }
 
-class PrimitiveExpression {
-  double calc() {
-    return 0;
-  }
-}
-
 void main() {
-  Map<String, dynamic> params = {
-    'x': 10,
-  };
-  MathExpression mathExpression = MathExpression('2+8');
-  print(mathExpression.eval(params));
+  List<({String exp, double res, Map<String, double> params})> examples = [
+    // (exp: '10*(5+4)/2-1', res: 51, params: {'x': 10}),
+    (exp: '10*5+4/2-1', res: 51, params: {'x': 10}),
+    // (expression: '(x*3-5)/5', result: '5', params: {'x': 10}),
+    // (expression: '3*x+15/(3+2)', result: '33', params: {'x': 10}),
+  ];
+  for (({String exp, double res, Map<String, double> params}) example
+      in examples) {
+    MathExpression mathExpression = MathExpression(example.exp);
+    print(mathExpression.eval(example.params));
+  }
 }
